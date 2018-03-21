@@ -28,6 +28,8 @@
     "quotes": ["error", "single", { "allowTemplateLiterals": true }],
     "comma-dangle": ["error", "always-multiline"],
     "semi": [ "error", "always" ],
-    "linebreak-style": ["error", "unix"]
+    "linebreak-style": ["error", "unix"],
+    "react/jsx-uses-react": "error",
+    "react/jsx-uses-vars": "error"
   }
 }
