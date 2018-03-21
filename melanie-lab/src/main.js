@@ -1,15 +1,14 @@
 'use strict';
 
-import React from 'react';
+// trying the React, {Component} structure that I saw on https://blog.stvmlbrn.com/2017/04/07/submitting-form-data-with-react.html
+import React, { Component } from 'react';
 import ReactDom from 'react-dom';
 import superagent from 'superagent';
 
-// onSubmit the form should make a request to reddit
-//    it should make a get request to http://reddit.com/r/${searchFormBoard}.json?limit=${searchFormLimit}
 //    on success it should pass the results to the application state
 //    on failure it should add a class to the form called error and turn the form's inputs borders red
 
-class SearchForm extends React.Component {
+class SearchForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -63,73 +62,76 @@ class SearchForm extends React.Component {
   }
 }
 
-// should inherit all search results through props
-// this component does not need to have its own state
-// if there are topics in the application state it should display an <ul>
-// each <li> in the <ul> should contain:
-//   an <a> tag with an href that points to the topic.url
-//      inside the <a> - a heading tag with the topic.title
-//      inside the <a> - a <p> tag with the number of topic.ups
+class SearchResultList extends Component {
+  constructor(props) {
+    super(props);
+  }
 
-// class SearchResultList extends React.Component {
-//   constructor(props) {
-//     super(props);
-//   }
-// }
+  render() {
+    return (
+      <div id="results">
+        {this.props.topics ? 
+          <section>
+            {console.log('section', this.props.topics.data.children)}
+            <ul>
+              {this.props.topics.data.children.map((post, i) => {
+                if (post.data.stickied === false) {
+                  return (
+                    <li key={i}>
+                      <a href={post.data.url}>{post.data.title}
+                      <p>{post.data.ups} upvotes</p></a>
+                    </li>
+                  )
+                }
+              })}
+            </ul>
+          </section>
+          :
+          undefined
+        }
+        {this.props.error ?
+          <section>
+            <h2>Womp womp. Please try searching again.</h2>
+          </section>
+          :
+          undefined
+        }
+      </div>
+    )
+  }
+}
 
-
-// should contain methods for modifying the application state
-class App extends React.Component {
+class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      // should contain all of the application state
-      // the state should contain a topics array for holding the results of the search
-      topics: {},
+      topics: null,
+      error: null,
     };
     this.updateState = this.updateState.bind(this);
     this.searchReddit = this.searchReddit.bind(this);
   }
-
-  // componentDidUpdate() {
-  //   // component updated
-  //   console.log('__STATE__', this.state);
-  // }
-
-  // componentDidMount() {
-  //   // component rendered to the DOM
-  //   console.log('componentDidMount', this.props);
-
-  //   if (localStorage.topics) {
-  //     try {
-  //       let topics = JSON.parse(localStorage.topics);
-  //       this.setState({ topics })
-  //     } catch (err) {
-  //       console.error(err)
-  //     }
-  //   } else {
-  //     superagent.get(`http://reddit.com/r/${this.props.textInput}.json?limit=${this.props.numberOfResults}`)
-  //     .then(result => {
-  //       console.log(result);
-  //     })
-  //     .catch(err => console.error(err));
-  //   }
-  // }
 
   updateState(text, limit) {
     this.searchReddit(text, limit)
       .then(res => {
         this.setState({
           topics: res.body,
+          error: null,
         })
         console.log(res.body)
       })
-      .catch(err => console.error(err))
+      .catch(err => {
+        this.setState({
+          topics: null,
+          error: err,
+        })
+      })
   }
 
   searchReddit(text, limit) {
     console.log(text)
-    console.log(limit)
+    console.log('limit',limit)
     return superagent.get(`http://www.reddit.com/r/${text}.json?limit=${limit}`)
   }
 
@@ -138,6 +140,7 @@ class App extends React.Component {
       <section>
         <h1>Reddit Search Form</h1>
         <SearchForm update_state={this.updateState}/>
+        <SearchResultList topics={this.state.topics} error={this.state.error}/>
       </section>
     );
   }
