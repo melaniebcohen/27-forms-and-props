@@ -6,7 +6,6 @@ import React, { Component } from 'react';
 import ReactDom from 'react-dom';
 import superagent from 'superagent';
 
-// on failure it should add a class to the form called error and turn the form's inputs borders red
 class SearchForm extends Component {
   constructor(props) {
     super(props);
@@ -38,7 +37,7 @@ class SearchForm extends Component {
 
   render() {
     return (
-      <form onSubmit={this.handleSubmit}>
+      <form onSubmit={this.handleSubmit} className={this.props.error ? 'formError' : 'formValid'}>
         <label>Subreddit</label>
         <input
           type='text'
@@ -46,6 +45,7 @@ class SearchForm extends Component {
           placeholder='Enter subreddit here'
           value={this.state.textInput}
           onChange={this.handleTextChange} />
+
         <label>Number of Results</label>
         <input
           type='number'
@@ -136,8 +136,8 @@ class App extends Component {
     return (
       <section>
         <h1>Reddit Search Form</h1>
-        <SearchForm update_state={this.updateState}/>
-        <SearchResultList topics={this.state.topics} error={this.state.error}/>
+        <SearchForm update_state={this.updateState} error={this.state.error}/>
+        <SearchResultList topics={this.state.topics} />
       </section>
     );
   }
